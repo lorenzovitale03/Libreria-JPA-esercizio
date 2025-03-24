@@ -1,0 +1,43 @@
+Traccia Esercizio: Gestione Biblioteca con Java Spring Boot, JPA e API REST
+Obiettivo
+Creare un'applicazione Spring Boot che gestisca una biblioteca, permettendo di aggiungere, modificare, eliminare e visualizzare libri attraverso API REST.
+
+Requisiti
+1. Tecnologie Utilizzate
+Spring Boot (Spring Web, Spring Data JPA, Spring Boot Starter)
+Database Relazionale (H2, PostgreSQL o MySQL)
+Hibernate per la gestione ORM
+API REST per l’interazione con il sistema
+Postman o Swagger UI per testare le API
+2. Funzionalità
+L’applicazione dovrà offrire i seguenti endpoint REST:
+
+[POST] /api/libri → Aggiungere un nuovo libro
+[GET] /api/libri → Recuperare tutti i libri
+[GET] /api/libri/{id} → Recuperare un singolo libro tramite ID
+[PUT] /api/libri/{id} → Modificare i dettagli di un libro
+[DELETE] /api/libri/{id} → Eliminare un libro
+3. Modello Dati
+Creare una classe Libro con i seguenti attributi:
+
+id (Long, generato automaticamente)
+titolo (String, non nullo)
+autore (String, non nullo)
+annoPubblicazione (Integer)
+genere (String)
+disponibile (Boolean, indica se il libro è disponibile per il prestito)
+4. Architettura del Progetto
+Entity: Classe Java mappata su tabella del database
+Repository: Interfaccia per operazioni CRUD su database (Spring Data JPA)
+Service: Logica di business per la gestione dei libri
+Controller: Espone le API REST
+5. Requisiti Aggiuntivi
+Validazione degli input con @Valid e @NotNull
+Gestione delle eccezioni con @ExceptionHandler
+Configurazione di Swagger per la documentazione API
+Possibilità di filtrare i libri per autore o genere con parametri di query
+Extra (Opzionale)
+Implementare l’entità Utente con gestione dei prestiti
+Implementare autenticazione con Spring Security e JWT
+Aggiungere la paginazione ai risultati dell’API
+⚡ Obiettivo finale: Creare un’API REST funzionante e testabile via Postman o Swagger.
