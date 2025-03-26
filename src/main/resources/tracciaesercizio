@@ -41,3 +41,85 @@ Implementare l’entità Utente con gestione dei prestiti
 Implementare autenticazione con Spring Security e JWT
 Aggiungere la paginazione ai risultati dell’API
 ⚡ Obiettivo finale: Creare un’API REST funzionante e testabile via Postman o Swagger.
+
+TESTO PARTE 2 VINCOLI
+1. Definizione dell'entità Utente
+Creare la classe Utente annotata con @Entity.
+
+Aggiungere gli attributi principali:
+
+id (chiave primaria, generata automaticamente con @GeneratedValue).
+
+nome, cognome, email (campi base).
+
+dataRegistrazione (per tenere traccia dell'iscrizione).
+
+Definire la relazione con i prestiti:
+
+Un utente può avere più prestiti → relazione OneToMany con Prestito.
+
+2. Definizione dell'entità Prestito
+Creare la classe Prestito annotata con @Entity.
+
+Aggiungere gli attributi principali:
+
+id (chiave primaria).
+
+dataInizio e dataFine (per sapere la durata del prestito).
+
+restituito (booleano per sapere se il libro è stato restituito).
+
+Definire la relazione con l'utente:
+
+Un prestito è associato a un solo utente → relazione ManyToOne con Utente.
+
+Definire la relazione con i libri:
+
+Un prestito è relativo a un solo libro → relazione ManyToOne con Libro.
+
+3. Repository JPA
+Creare le interfacce UtenteRepository e PrestitoRepository, estendendo JpaRepository, per avere le operazioni CRUD.
+
+4. Service Layer
+Creare UtenteService per la logica di business:
+
+Registrare un nuovo utente.
+
+Recuperare un utente per ID.
+
+Recuperare tutti gli utenti.
+
+Creare PrestitoService per la logica di gestione dei prestiti:
+
+Creare un nuovo prestito.
+
+Verificare se un utente ha già libri in prestito.
+
+Segnare un prestito come restituito.
+
+5. Controller REST
+Creare UtenteController con endpoint per:
+
+Creare un utente (POST /utenti).
+
+Recuperare tutti gli utenti (GET /utenti).
+
+Recuperare un utente per ID (GET /utenti/{id}).
+
+Creare PrestitoController con endpoint per:
+
+Creare un nuovo prestito (POST /prestiti).
+
+Segnare un prestito come restituito (PUT /prestiti/{id}/restituisci).
+
+Recuperare i prestiti di un utente (GET /utenti/{id}/prestiti).
+
+6. Validazioni e Eccezioni
+Usare @Valid per validare i dati in input.
+
+Gestire errori con un @ControllerAdvice globale.
+
+7. Testing
+Scrivere test unitari per UtenteService e PrestitoService con JUnit e Mockito.
+
+Testare i repository con @DataJpaTest.

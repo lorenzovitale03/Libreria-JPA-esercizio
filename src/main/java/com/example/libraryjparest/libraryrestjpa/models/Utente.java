@@ -1,38 +1,39 @@
 package com.example.libraryjparest.libraryrestjpa.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDate;
 import java.util.List;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Entity
-@Table(name = "libri")
-@JsonIgnoreProperties({"prestiti"})  // Ignora i prestiti durante la serializzazione
+@Table(name = "utenti")
 
-public class Libro {
+
+public class Utente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
-    private String titolo;
+    private String nome;
     @Column(nullable = false)
-    private String autore;
-    private Integer annoPubblicazione;
-    private String genere;
-    private String tipo;
-    private Boolean disponibile;
+    private String email;
+    @Column(nullable = false, unique = true)
+    private String password;
+    @Column(nullable = false)
+    private LocalDate dataRegistrazione;
 
-    //Singolo libro , piu' prestiti
-    @OneToMany(mappedBy = "libro")
+    @OneToMany(mappedBy = "utente")
     @JsonManagedReference
-    private List<Prestito> prestiti;
-
+    private List<Prestito> prestito;
 }
