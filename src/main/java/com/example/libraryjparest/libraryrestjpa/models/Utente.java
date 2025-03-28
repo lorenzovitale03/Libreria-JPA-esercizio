@@ -18,6 +18,7 @@ import java.util.List;
 @Entity
 @Table(name = "utenti")
 
+@JsonIgnoreProperties({"utente"}) // Ignora utente quando serializzi
 
 public class Utente {
 
@@ -33,7 +34,7 @@ public class Utente {
     @Column(nullable = false)
     private LocalDate dataRegistrazione;
 
-    @OneToMany(mappedBy = "utente")
+    @OneToMany(mappedBy = "utente", fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Prestito> prestito;
 }

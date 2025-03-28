@@ -7,7 +7,11 @@ import com.example.libraryjparest.libraryrestjpa.repository.LibroRepository;
 import com.example.libraryjparest.libraryrestjpa.repository.UtenteRepository;
 import com.example.libraryjparest.libraryrestjpa.service.PrestitoService;
 import com.example.libraryjparest.libraryrestjpa.service.UtenteService;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityNotFoundException;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,19 +25,18 @@ public class PrestitoController {
     @Autowired LibroRepository libroRepository;
 
     @PostMapping
-    public Prestito createLoan(@RequestParam Long idUser, @RequestParam Long idBook){
+    public ResponseEntity<Prestito> createLoan(@RequestParam Long idUser, @RequestParam Long idBook){
         Utente utente = utenteRepository.findById(idUser).orElse(null);
         Libro libro = libroRepository.findById(idBook).orElse(null);
 
-        //Se l'utente e il libro non sono presenti nel db, non ritorni nulla..
-        //vado a gestire poi in seguito le eccezioni
+        //Se l'utente e il libro non sono presenti nel db, gestisci l'eccezione.
         if(utente == null || libro == null){
-            return null;
+            throw new EntityNotFoundException("libro e/o utente non trovati");
         }
-        return prestitoService.creaPrestito(utente,libro);
+        return ResponseEntity.ok(prestitoService.creaPrestito(utente,libro));
     }
 
-    @GetMapping("/utenti/{id}/prestiti")
+    /*@GetMapping("/utenti/{id}/prestiti")
     public boolean activeLoans(@PathVariable Long id){
         Utente utente = utenteRepository.findById(id).orElse(null);
 
@@ -43,22 +46,26 @@ public class PrestitoController {
         }
 
         return prestitoService.prestitiAttivi(utente);
-    }
+    }*/
 
     @PutMapping("/prestiti/{id}/{libroId}/restituisci")
-    public Prestito giveBackLoan(@PathVariable Long id, @PathVariable Long libroId){
+    public ResponseEntity<Prestito> giveBackLoan(@PathVariable Long id, @PathVariable Long libroId, @RequestParam(required = false) Long libroPrendereId){
         //Per prima cosa mi recupero l'utente da id e il libro da id
         Utente utenteRestituisce = utenteRepository.findById(id).orElse(null);
         Libro libroRestituito = libroRepository.findById(libroId).orElse(null);
 
         //vado a verificare la presenza o meno di libri e utenti nel db
         if(utenteRestituisce == null || libroRestituito == null){
-            return null; //Non ci sono prestiti attivi
-        }else {
-            System.out.println("Libro restituito con successo!");
+            throw new  EntityNotFoundException("libro e/o utente non trovati");
         }
 
-        return prestitoService.restituisciPrestito(utenteRestituisce);
+        Libro libroPrendere = null;
+        if(libroPrendereId != null){
+            libroPrendere = libroRepository.findById(libroPrendereId). orElseThrow(() ->
+            new EntityNotFoundException("prestito non attivo"));
+        }
+
+        return ResponseEntity.ok(prestitoService.restituisciPrestito(utenteRestituisce, libroRestituito, libroPrendere));
 
     }
 }

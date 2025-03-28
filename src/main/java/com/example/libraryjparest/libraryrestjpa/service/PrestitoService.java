@@ -3,6 +3,7 @@ package com.example.libraryjparest.libraryrestjpa.service;
 import com.example.libraryjparest.libraryrestjpa.models.Libro;
 import com.example.libraryjparest.libraryrestjpa.models.Prestito;
 import com.example.libraryjparest.libraryrestjpa.models.Utente;
+import com.example.libraryjparest.libraryrestjpa.repository.LibroRepository;
 import com.example.libraryjparest.libraryrestjpa.repository.PrestitoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.Optional;
 public class PrestitoService {
 
     @Autowired PrestitoRepository prestitoRepository;
+    @Autowired LibroRepository libroRepository;
 
     //Post = creo il prestito per l'utente se non ha ancora nessun libro
     public Prestito creaPrestito(Utente utente, Libro libro){
@@ -37,18 +39,40 @@ public class PrestitoService {
     }
 
     //Put = modifica del prestito
-    public Prestito restituisciPrestito(Utente utente){
+    public Prestito restituisciPrestito(Utente utente, Libro libroRestituire, Libro libroPrendere){
         //trovo il prestito attivo dell'utente
-        Prestito prestitoAttivo = prestitoRepository.findByUtenteAndRestituitoFalse(utente);
-        //verinofico se il libro è ancora in prestito o no.
-        //se è ancora in prestito, lo restituisco e setto la data in cui è stato consegnato
-
-        if(prestitoAttivo != null){
-            prestitoAttivo.setRestituito(true);
-            prestitoAttivo.setDataFine(LocalDate.now());
+        Prestito prestitoAttivo = prestitoRepository.findByUtenteAndLibroAndRestituitoFalse(utente,libroRestituire);
+        //Se il libro di quel libro non è attivo, ritorna null
+        if(prestitoAttivo == null){
+            return null;
         }
 
-        //salvo le modifiche nel db
-        return prestitoRepository.save(prestitoAttivo);
+        //Segna il prestito come restituito
+        prestitoAttivo.setRestituito(true);
+        prestitoAttivo.setDataFine(LocalDate.now());
+
+        //Il libro quindi è disponibile
+        libroRestituire.setDisponibile(true);
+        libroRepository.save(libroRestituire);
+
+        //se il libro non è disponibile ritorno null
+       if(!libroPrendere.getDisponibile()){
+           return null;
+       }
+        //se è disponibile creo un nuovo libro da prendere in prestito
+       Prestito nuovoPrestito = new Prestito();
+       nuovoPrestito.setUtente(utente);
+       nuovoPrestito.setLibro(libroPrendere);
+       nuovoPrestito.setDataInizio(LocalDate.now());
+       nuovoPrestito.setRestituito(false);
+
+       //di conseguenza setto il libro non disponibile e lo aggiorno nel db
+        libroPrendere.setDisponibile(false);
+        libroRepository.save(libroPrendere);
+
+        //salvo il prestito
+        return prestitoRepository.save(nuovoPrestito);
     }
 }
+
+
