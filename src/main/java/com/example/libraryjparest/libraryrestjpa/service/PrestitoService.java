@@ -50,10 +50,17 @@ public class PrestitoService {
         //Segna il prestito come restituito
         prestitoAttivo.setRestituito(true);
         prestitoAttivo.setDataFine(LocalDate.now());
+        prestitoRepository.save(prestitoAttivo);
 
         //Il libro quindi è disponibile
         libroRestituire.setDisponibile(true);
         libroRepository.save(libroRestituire);
+
+        // Se l'utente NON ha scelto un nuovo libro, fermati qui e ritorna il prestito chiuso
+        if (libroPrendere == null) {
+            return prestitoAttivo;
+        }
+
 
         //se il libro non è disponibile ritorno null
        if(!libroPrendere.getDisponibile()){

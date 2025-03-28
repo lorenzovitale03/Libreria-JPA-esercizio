@@ -4,10 +4,12 @@ import com.example.libraryjparest.libraryrestjpa.models.Libro;
 import com.example.libraryjparest.libraryrestjpa.models.Prestito;
 import com.example.libraryjparest.libraryrestjpa.models.Utente;
 import com.example.libraryjparest.libraryrestjpa.repository.LibroRepository;
+import com.example.libraryjparest.libraryrestjpa.repository.PrestitoRepository;
 import com.example.libraryjparest.libraryrestjpa.repository.UtenteRepository;
 import com.example.libraryjparest.libraryrestjpa.service.PrestitoService;
 import com.example.libraryjparest.libraryrestjpa.service.UtenteService;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/prestiti")
@@ -23,6 +26,7 @@ public class PrestitoController {
     @Autowired PrestitoService prestitoService;
     @Autowired UtenteRepository utenteRepository;
     @Autowired LibroRepository libroRepository;
+    @Autowired PrestitoRepository prestitoRepository;
 
     @PostMapping
     public ResponseEntity<Prestito> createLoan(@RequestParam Long idUser, @RequestParam Long idBook){
@@ -59,13 +63,22 @@ public class PrestitoController {
             throw new  EntityNotFoundException("libro e/o utente non trovati");
         }
 
-        Libro libroPrendere = null;
-        if(libroPrendereId != null){
-            libroPrendere = libroRepository.findById(libroPrendereId). orElseThrow(() ->
-            new EntityNotFoundException("prestito non attivo"));
+        //verifico se il prestito è attivo. Se non lo è gestico l'eccezione
+        Prestito prestito = prestitoRepository.findByUtenteAndLibroAndRestituitoFalse(utenteRestituisce,libroRestituito);
+        if(prestito == null){
+            throw new EntityExistsException("Prestito non attivo");
         }
 
-        return ResponseEntity.ok(prestitoService.restituisciPrestito(utenteRestituisce, libroRestituito, libroPrendere));
+        //Mi vado a recuperare il libro da prendere in prestito e verifico se è presente o no nel db
+        Libro libroPrendere = null;
+        if(libroPrendereId != null){
+            libroPrendere = libroRepository.findById(libroPrendereId).orElse(null);
+        }
+        if(libroPrendereId == null){
+            throw new EntityExistsException("Libro non disponibile per il prestito");
+        }
+
+        return ResponseEntity.ok(prestito);
 
     }
 }
